@@ -8,3 +8,10 @@ Thumbs.db
 preview-*.png
 __modal_test.html
 __music_test.html
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example
