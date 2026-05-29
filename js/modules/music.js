@@ -2,9 +2,9 @@
 window.MusicModule = (function () {
   const VOLUME_KEY = "music-player-volume";
   const DEPTH = [
-    { scale: 0.55, opacity: 1, blur: 0, duration: 38, z: 1 },
-    { scale: 0.78, opacity: 1, blur: 0, duration: 28, z: 2 },
-    { scale: 1, opacity: 1, blur: 0, duration: 20, z: 3 },
+    { scale: 0.55, duration: 38, z: 1 },
+    { scale: 0.78, duration: 28, z: 2 },
+    { scale: 1, duration: 20, z: 3 },
   ];
 
   let root = null;
@@ -74,7 +74,6 @@ window.MusicModule = (function () {
       el.alt = "";
       el.draggable = false;
       el.style.setProperty("--cover-scale", d.scale);
-      el.style.setProperty("--cover-duration", d.duration + "s");
       el.style.setProperty("--cover-z", d.z);
       el.style.left = 5 + Math.random() * 85 + "%";
       el.style.top = 5 + Math.random() * 75 + "%";

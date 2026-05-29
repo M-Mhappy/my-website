@@ -58,9 +58,7 @@
     document.addEventListener("pointerleave", () => (pointer.active = false));
   }
 
-  const rand = (a, b) => a + Math.random() * (b - a);
-  const pick = (arr) => arr[(Math.random() * arr.length) | 0];
-  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const { rand, pick, clamp, sceneHeight } = window.SHARED;
 
   // 各类生物共用的基础字段
   function baseAgent(depth) {
@@ -148,14 +146,6 @@
       color: pick(WEED_COLORS),
       blades: 1 + ((Math.random() * 2) | 0),
     };
-  }
-
-  function sceneHeight() {
-    const scene = document.getElementById("scene");
-    return Math.max(
-      1,
-      window.SCENE_HEIGHT || (scene && scene.clientHeight) || window.innerHeight
-    );
   }
 
   function resize() {

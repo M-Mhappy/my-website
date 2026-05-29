@@ -9,13 +9,7 @@
   let dpr = 1;
   let points = [];
 
-  function sceneHeight() {
-    const scene = document.getElementById("scene");
-    return Math.max(
-      1,
-      window.SCENE_HEIGHT || (scene && scene.clientHeight) || window.innerHeight
-    );
-  }
+  const { sceneHeight } = window.SHARED;
 
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);

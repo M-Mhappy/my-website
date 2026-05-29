@@ -150,6 +150,23 @@
   background: rgba(255, 255, 255, 0.85);
 }
 
+/* 平板：弹卡略缩小，保留圆角 */
+@media (max-width: 1023px) and (min-width: 761px) {
+  .modal-overlay {
+    padding: 2vh 3vw;
+  }
+
+  .modal-card {
+    width: min(92vw, 960px);
+    height: min(88vh, 88dvh);
+    max-height: 900px;
+  }
+
+  .modal-card__body {
+    padding: 28px 32px 36px;
+  }
+}
+
 @media (max-width: 760px) {
   .modal-overlay {
     padding: 0;

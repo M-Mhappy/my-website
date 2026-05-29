@@ -2,8 +2,6 @@
   /* 字体 */
   --font-title: "ZCOOL KuaiLe", "Noto Sans SC", cursive;
   --font-body: "Noto Sans SC", "PingFang SC", sans-serif;
-  --font-en: "Fredoka", "Nunito", sans-serif;
-
   /* 海洋（贴合素材的青蓝水色） */
   --water-top: #6fc6dc;
   --water-mid: #3fa3c4;
@@ -17,22 +15,23 @@
   /* 沙滩留白 */
   --sand: #e7d49a;
 
-  /* 海洋场景居中栏宽度（两侧留出沙滩留白）；较此前每侧外扩约 1cm */
-  --scene-w: min(1236px, 100vw);
+  /* 布局设计稿：海洋 1160 + 两侧沙滩各 210（总宽 1580），窄屏等比缩小 */
+  --design-ocean: 1160px;
+  --design-sand: 210px;
+  --design-total: 1580;
+  /* 1160/1580 ≈ 73.418vw；勿写 100vw*1160px（单位相乘非法，会导致海洋宽度失效） */
+  --scene-w: min(var(--design-ocean), 73.418vw);
+
+  /* 岛屿 / 资料卡缩放（main.js 按海洋栏宽度覆盖） */
+  --layout-scale: 1;
 
   /* 尺度 */
   --label-blur: blur(14px);
 }
 
-/* 宽屏：两侧留出沙滩（留白较此前缩减约 1/3） */
-@media (min-width: 1024px) {
-  :root {
-    --scene-w: min(1276px, calc(100vw - 214px));
-  }
-}
-
 /* 页面底色：沙滩黄 + 细微沙粒质感（两侧留白可见） */
 body {
+  position: relative;
   background-color: var(--sand);
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E"),
@@ -48,6 +47,7 @@ body {
   position: relative;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* ============ 两侧沙滩装饰层（仅在留白区绘制） ============ */
@@ -129,7 +129,10 @@ body {
   z-index: 3;
   width: var(--scene-w);
   margin: 0 auto;
-  padding: 60px 0 120px;
+  padding:
+    calc(210px * var(--layout-scale) + env(safe-area-inset-top, 0px))
+    0
+    calc(120px * var(--layout-scale) + env(safe-area-inset-bottom, 0px));
 }
 
 /* ============ 岛屿层 ============ */
@@ -178,9 +181,24 @@ body {
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.island:hover .island__inner,
-.island:focus-visible .island__inner {
-  transform: translateY(-6px) scale(1.06);
+@media (hover: hover) and (pointer: fine) {
+  .island:hover .island__inner,
+  .island:focus-visible .island__inner {
+    transform: translateY(-6px) scale(1.06);
+  }
+
+  .island:hover .island__label {
+    transform: translate(-50%, -108%);
+    box-shadow: 0 8px 20px rgba(15, 60, 80, 0.26);
+  }
+}
+
+/* 触屏：点击时短暂高亮，避免 hover 粘滞 */
+@media (hover: none) {
+  .island:active .island__inner {
+    transform: translateY(-4px) scale(1.04);
+    transition-duration: 0.15s;
+  }
 }
 
 @keyframes island-float {
@@ -232,15 +250,15 @@ body {
 .island__label {
   position: absolute;
   left: 50%;
-  top: -14px;
+  top: calc(-14px * var(--layout-scale, 1));
   transform: translate(-50%, -100%);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 16px;
-  border-radius: 20px;
+  gap: calc(6px * var(--layout-scale, 1));
+  padding: calc(6px * var(--layout-scale, 1)) calc(16px * var(--layout-scale, 1));
+  border-radius: calc(20px * var(--layout-scale, 1));
   white-space: nowrap;
-  font-size: 14px;
+  font-size: calc(14px * var(--layout-scale, 1));
   font-weight: 500;
   color: var(--ink);
   background: rgba(255, 253, 247, 0.7);
@@ -265,32 +283,31 @@ body {
   transform: translateX(-50%) rotate(45deg);
 }
 
-.island:hover .island__label {
-  transform: translate(-50%, -108%);
-  box-shadow: 0 8px 20px rgba(15, 60, 80, 0.26);
-}
-
 .island__label .dot {
-  width: 8px;
-  height: 8px;
+  width: calc(8px * var(--layout-scale, 1));
+  height: calc(8px * var(--layout-scale, 1));
   border-radius: 50%;
   background: var(--island-color, #26a69a);
 }
 
-/* ============ 左上角资料卡（常驻视口，限左侧沙滩宽度内） ============ */
+/* ============ 左上角资料卡（竖排，随 --layout-scale 等比缩小） ============ */
 .profile {
-  position: fixed;
-  top: 18px;
-  left: 16px;
+  position: absolute;
+  top: calc(18px * var(--layout-scale, 1) + env(safe-area-inset-top, 0px));
+  left: calc(16px * var(--layout-scale, 1) + env(safe-area-inset-left, 0px));
   z-index: 50;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  /* 限在左侧沙滩宽度内（不压海面）：做大但不超过留白 */
-  width: min(200px, calc((100vw - var(--scene-w)) / 2 - 24px));
-  padding: 22px 16px 18px;
-  border-radius: 22px;
+  gap: calc(6px * var(--layout-scale, 1));
+  width: calc(200px * var(--layout-scale, 1));
+  max-width: calc((100vw - var(--scene-w)) / 2 - 8px);
+  padding:
+    calc(22px * var(--layout-scale, 1))
+    calc(16px * var(--layout-scale, 1))
+    calc(18px * var(--layout-scale, 1));
+  box-sizing: border-box;
+  border-radius: calc(22px * var(--layout-scale, 1));
   text-align: center;
   background: rgba(255, 253, 247, 0.74);
   backdrop-filter: blur(16px) saturate(1.1);
@@ -307,26 +324,26 @@ body {
 
 .profile__avatar {
   flex: none;
-  width: 76px;
-  height: 76px;
+  width: calc(76px * var(--layout-scale, 1));
+  height: calc(76px * var(--layout-scale, 1));
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  margin-bottom: 4px;
+  border: calc(3px * var(--layout-scale, 1)) solid #fff;
+  box-shadow: 0 calc(4px * var(--layout-scale, 1)) calc(12px * var(--layout-scale, 1)) rgba(0, 0, 0, 0.15);
+  margin-bottom: calc(4px * var(--layout-scale, 1));
 }
 
 .profile__name {
   font-family: var(--font-title);
-  font-size: 20px;
+  font-size: calc(20px * var(--layout-scale, 1));
   line-height: 1.2;
   color: var(--ink);
 }
 
 .profile__tagline {
-  font-size: 12px;
+  font-size: calc(12px * var(--layout-scale, 1));
   color: var(--ink-soft);
-  margin: 2px 0 10px;
+  margin: calc(2px * var(--layout-scale, 1)) 0 calc(10px * var(--layout-scale, 1));
 }
 
 .profile__contacts {
@@ -338,19 +355,20 @@ body {
 .profile__contact {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: calc(6px * var(--layout-scale, 1));
   max-width: 100%;
-  padding: 6px 12px;
+  padding: calc(6px * var(--layout-scale, 1)) calc(12px * var(--layout-scale, 1));
   border-radius: 999px;
-  font-size: 13px;
+  font-size: calc(13px * var(--layout-scale, 1));
   font-variant-numeric: tabular-nums;
   color: var(--ink);
   background: rgba(255, 255, 255, 0.62);
   transition: transform 0.2s ease, background 0.2s ease;
+  word-break: keep-all;
 }
 
 .profile__contact .qq-ico {
-  font-size: 15px;
+  font-size: calc(15px * var(--layout-scale, 1));
   line-height: 1;
 }
 
@@ -397,60 +415,108 @@ body {
   letter-spacing: 1px;
 }
 
-.loader__dots::after {
-  content: "";
-  animation: dots 1.4s steps(4, end) infinite;
-}
-
-@keyframes dots {
-  0%   { content: ""; }
-  25%  { content: "."; }
-  50%  { content: ".."; }
-  75%  { content: "..."; }
+.loader__dots {
+  display: inline-block;
+  min-width: 1em;
+  text-align: left;
 }
 
 /* ============ 响应式 ============ */
 
-/* 较窄屏：左侧沙滩很窄，名片改为左上角紧凑横排（不依赖沙滩宽度） */
+/* iOS：fixed 背景易错位 */
 @media (max-width: 1023px) {
-  .profile {
-    top: 14px;
-    left: 14px;
-    flex-direction: row;
-    align-items: center;
-    width: auto;
-    max-width: calc(100vw - 28px);
-    gap: 12px;
-    padding: 10px 16px 10px 10px;
-    text-align: left;
-    border-radius: 18px;
+  body {
+    background-attachment: scroll, scroll;
   }
-  .profile__avatar {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 0;
-  }
-  .profile__name { font-size: 17px; }
-  .profile__tagline { margin: 1px 0 5px; }
-  .profile__contacts { justify-content: flex-start; }
 }
 
-@media (max-width: 600px) {
-  .island__label { font-size: 12px; padding: 5px 12px; }
-  .board { padding-top: 150px; padding-bottom: 80px; }
-  .profile__tagline { display: none; }
-  .profile__contact { font-size: 11px; padding: 4px 10px; }
-}
-
+/* 极窄屏：标签略减模糊半径以保性能 */
 @media (max-width: 480px) {
-  .board { padding-top: 130px; }
-  .island__label { font-size: 11px; padding: 4px 10px; max-width: 140px; }
-  .profile {
-    top: max(10px, env(safe-area-inset-top));
-    left: max(10px, env(safe-area-inset-left));
-    padding: 8px 12px 8px 8px;
-    gap: 10px;
+  :root {
+    --label-blur: blur(8px);
   }
-  .profile__avatar { width: 42px; height: 42px; }
-  .profile__name { font-size: 15px; }
+}
+
+/* ============ 手机端（≤640px）自适应布局 ============ */
+@media (max-width: 640px) {
+  /* 海洋占满几乎整个宽度，仅留细窄沙滩边 */
+  :root {
+    --scene-w: 94vw;
+  }
+
+  /* 海洋微调：窄屏下减少两侧投影扩散，避免溢出 */
+  .ocean {
+    box-shadow: 0 0 30px rgba(15, 55, 75, 0.2);
+  }
+
+  /* board 顶部留出资料卡的空间 */
+  .board {
+    padding-top: 72px;
+  }
+
+  /* ===== 资料卡：改为顶部固定横向紧凑卡片 ===== */
+  .profile {
+    position: fixed;
+    top: max(6px, env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    width: auto;
+    max-width: calc(94vw - 12px);
+    margin: 0;
+    padding: 6px 12px;
+    border-radius: 14px;
+    text-align: left;
+    z-index: 100;
+  }
+
+  .profile__avatar {
+    width: 36px;
+    height: 36px;
+    border-width: 2px;
+    margin-bottom: 0;
+    flex: none;
+  }
+
+  .profile__name {
+    font-size: 15px;
+    white-space: nowrap;
+  }
+
+  .profile__tagline {
+    display: none;
+  }
+
+  .profile__contacts {
+    margin-left: auto;
+    width: auto;
+    flex: none;
+  }
+
+  .profile__contact {
+    font-size: 11px;
+    padding: 3px 8px;
+    gap: 4px;
+  }
+
+  .profile__contact .qq-ico {
+    font-size: 12px;
+  }
+
+  /* 岛屿标签：确保在较小尺寸下仍可读 */
+  .island__label {
+    font-size: max(11px, calc(14px * var(--layout-scale, 1)));
+    padding: max(4px, calc(6px * var(--layout-scale, 1)))
+             max(10px, calc(16px * var(--layout-scale, 1)));
+    gap: max(3px, calc(6px * var(--layout-scale, 1)));
+    border-radius: max(12px, calc(20px * var(--layout-scale, 1)));
+  }
+
+  .island__label .dot {
+    width: max(5px, calc(8px * var(--layout-scale, 1)));
+    height: max(5px, calc(8px * var(--layout-scale, 1)));
+  }
 }

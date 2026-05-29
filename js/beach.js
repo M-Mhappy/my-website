@@ -4,10 +4,8 @@
   const canvas = document.getElementById("beach");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
+  const { rand, pick, clamp, sceneHeight } = window.SHARED;
   const TAU = Math.PI * 2;
-  const rand = (a, b) => a + Math.random() * (b - a);
-  const pick = (a) => a[(Math.random() * a.length) | 0];
-  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
   const SHELL_COLORS = [
     "#FF9AA2", "#FFB7B2", "#FFD79A", "#E5A8FF",
@@ -79,14 +77,6 @@
     return null;
   }
 
-  function sceneHeight() {
-    const scene = document.getElementById("scene");
-    return Math.max(
-      1,
-      window.SCENE_HEIGHT || (scene && scene.clientHeight) || window.innerHeight
-    );
-  }
-
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     w = window.innerWidth;
@@ -112,23 +102,30 @@
     const avoid = profileBox();
     for (const band of bands) {
       const gw = band.x1 - band.x0;
-      if (gw < 44) continue; // 留白太窄不放装饰
+      if (gw < 10) continue; // 留白太窄不放装饰
       const area = gw * h;
+      const narrow = gw < 50; // 窄带模式：用更小的贝壳和更少的寄居蟹
 
-      const shellN = clamp(Math.round(area / 24000), 3, 14);
+      const shellN = narrow
+        ? clamp(Math.round(area / 40000), 1, 6)
+        : clamp(Math.round(area / 24000), 3, 14);
+      const shellPad = narrow ? 8 : 24;
+      const shellSizeMin = narrow ? 5 : 11;
+      const shellSizeMax = narrow ? 10 : 20;
       for (let i = 0; i < shellN; i++) {
-        const p = spot(band.x0, band.x1, 24, band.side === "L" ? avoid : null);
+        const p = spot(band.x0, band.x1, shellPad, band.side === "L" ? avoid : null);
         if (!p) continue;
         shells.push({
           x: p.x, y: p.y,
-          size: rand(11, 20),
-          rot: rand(-0.5, 0.5),
+          size: rand(shellSizeMin, shellSizeMax),
+          rot: rand(-0.4, 0.4),
           color: pick(SHELL_COLORS),
           type: pick(["fan", "spiral", "clam"]),
         });
       }
 
-      const crabN = gw > 90 ? (Math.random() < 0.6 ? 2 : 1) : 1;
+      const crabN = narrow ? 0 : (gw > 90 ? (Math.random() < 0.6 ? 2 : 1) : 1);
+      const crabPad = Math.min(26, gw * 0.4);
       for (let i = 0; i < crabN; i++) {
         let cy = rand(40, h - 30);
         for (let t = 0; t < 20; t++) {
@@ -136,9 +133,9 @@
           if (!(band.side === "L" && avoid && cy > avoid.y0 && cy < avoid.y1)) break;
         }
         crabs.push({
-          x: rand(band.x0 + 26, band.x1 - 26),
+          x: rand(band.x0 + crabPad, band.x1 - crabPad),
           y: cy,
-          size: rand(15, 22),
+          size: gw > 90 ? rand(15, 22) : rand(10, 15),
           dir: Math.random() < 0.5 ? -1 : 1,
           spd: rand(6, 14),
           phase: rand(0, TAU),

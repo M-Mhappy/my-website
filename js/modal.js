@@ -33,7 +33,6 @@ window.Modal = (function () {
   const subtitleEl = overlay.querySelector(".modal-card__subtitle");
 
   let activeModule = null;
-  let activeIsland = null;
 
   function getModule(island) {
     const modules = window.ISLAND_MODULES || {};
@@ -45,7 +44,6 @@ window.Modal = (function () {
       activeModule.unmount();
     }
     activeModule = null;
-    activeIsland = null;
     card.classList.remove("modal-card--immersive");
     headEl.hidden = false;
     contentEl.innerHTML = PLACEHOLDER_HTML;
@@ -53,7 +51,6 @@ window.Modal = (function () {
 
   function open(island) {
     resetContent();
-    activeIsland = island;
 
     overlay.style.setProperty("--card-color", island.color);
     card.querySelector(".modal-card__bar").style.background = island.color;

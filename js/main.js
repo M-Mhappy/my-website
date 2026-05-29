@@ -2,6 +2,9 @@
 (function () {
   const stage = document.getElementById("islands");
   const islands = window.ISLANDS || [];
+  /** 岛屿布局的设计基准宽度（与 css --scene-w 桌面值一致） */
+  const DESIGN_BOARD_W = 1236;
+  const islandNodes = [];
 
   function buildIsland(data) {
     const el = document.createElement("div");
@@ -39,19 +42,36 @@
     return el;
   }
 
-  islands.forEach((data) => stage.appendChild(buildIsland(data)));
-
-  if (window.BOARD_HEIGHT) {
-    stage.style.height = window.BOARD_HEIGHT + "px";
-  }
+  islands.forEach((data) => {
+    const el = buildIsland(data);
+    stage.appendChild(el);
+    islandNodes.push({ el, data });
+  });
 
   // 设置整体场景高度，并通知各画布层按此高度自适应（解决脚本顺序 / 视口变化）
   const scene = document.getElementById("scene");
   const board = document.getElementById("board");
 
+  /** 按海洋栏实际宽度等比缩放岛屿尺寸与纵向间距，避免窄屏重叠、宽屏过小 */
+  function applyResponsiveIslands() {
+    if (!board || !islandNodes.length) return 0;
+    const raw = board.offsetWidth / DESIGN_BOARD_W;
+    const scale = Math.max(0.45, Math.min(1.08, raw));
+    document.documentElement.style.setProperty("--layout-scale", scale.toFixed(4));
+
+    for (const { el, data } of islandNodes) {
+      el.style.width = Math.round(data.size * scale) + "px";
+      el.style.top = Math.round(data.y * scale) + "px";
+    }
+    const boardH = Math.round((window.BOARD_HEIGHT || 1380) * scale);
+    stage.style.height = boardH + "px";
+    return boardH;
+  }
+
   function layoutScene() {
     if (!scene) return;
-    const content = board ? board.offsetHeight : window.BOARD_HEIGHT || 0;
+    const boardH = applyResponsiveIslands();
+    const content = board ? Math.max(board.offsetHeight, boardH) : boardH;
     const sceneH = Math.max(content, window.innerHeight);
     scene.style.height = sceneH + "px";
     window.SCENE_HEIGHT = sceneH;
@@ -61,6 +81,21 @@
   layoutScene();
   window.addEventListener("resize", layoutScene, { passive: true });
   window.addEventListener("load", layoutScene, { passive: true });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", layoutScene, { passive: true });
+  }
+
+  // 加载页省略号动画（Safari 不支持 content 属性 CSS 动画）
+  const loaderDots = document.getElementById("loaderDots");
+  let dotsTimer = 0;
+  if (loaderDots) {
+    const frames = ["", ".", "..", "..."];
+    let idx = 0;
+    dotsTimer = setInterval(() => {
+      idx = (idx + 1) % frames.length;
+      loaderDots.textContent = frames[idx];
+    }, 350);
+  }
 
   const still = new URLSearchParams(location.search).has("still");
 
@@ -70,6 +105,7 @@
     const loader = document.getElementById("loader");
 
     if (still) {
+      clearInterval(dotsTimer);
       nodes.forEach((node) => node.classList.add("is-in"));
       profile.classList.add("is-in");
       loader.classList.add("is-hidden");
@@ -81,7 +117,10 @@
       requestAnimationFrame(() => node.classList.add("is-in"));
     });
     setTimeout(() => profile.classList.add("is-in"), nodes.length * 120 + 300);
-    setTimeout(() => loader.classList.add("is-hidden"), 600);
+    setTimeout(() => {
+      clearInterval(dotsTimer);
+      loader.classList.add("is-hidden");
+    }, 600);
   }
 
   if (document.readyState === "loading") {
