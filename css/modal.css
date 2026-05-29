@@ -1,0 +1,132 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: grid;
+  place-items: center;
+  padding: 4vh 4vw;
+  background: rgba(10, 30, 45, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.modal-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-card {
+  position: relative;
+  width: 80vw;
+  height: 80vh;
+  max-width: 1400px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  border-radius: 24px;
+  box-shadow: 0 30px 70px rgba(10, 30, 45, 0.4);
+  transform: translateY(60px) scale(0.96);
+  opacity: 0;
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+}
+
+.modal-overlay.is-open .modal-card {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+/* 顶部主题色条 */
+.modal-card__bar {
+  height: 8px;
+  flex: none;
+  background: var(--card-color, #26a69a);
+}
+
+.modal-card__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  z-index: 2;
+}
+
+.modal-card__close:hover {
+  background: var(--card-color, #26a69a);
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+.modal-card__body {
+  flex: 1;
+  padding: 36px 44px 44px;
+  overflow-y: auto;
+}
+
+.modal-card__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.modal-card__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+  background: color-mix(in srgb, var(--card-color, #26a69a) 18%, #fff);
+}
+
+.modal-card__title {
+  font-family: var(--font-title);
+  font-size: 26px;
+  color: var(--ink);
+}
+
+.modal-card__subtitle {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.modal-card__content {
+  padding-top: 22px;
+  min-height: 240px;
+  color: var(--ink);
+  line-height: 1.8;
+}
+
+.modal-card__placeholder {
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+
+@media (max-width: 760px) {
+  .modal-card {
+    width: 92vw;
+    height: 90vh;
+    border-radius: 20px;
+  }
+  .modal-card__body {
+    padding: 28px 24px 32px;
+  }
+  .modal-card__title { font-size: 22px; }
+}

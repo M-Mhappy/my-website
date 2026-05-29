@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>群岛 · Archipelago</title>
+  <meta name="description" content="以群岛隐喻人生的不同侧面——一个可探索的个人主页。" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700&family=Fredoka:wght@500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/modal.css" />
+</head>
+<body>
+  <!-- 加载页 -->
+  <div id="loader" class="loader">
+    <div class="loader__spinner"></div>
+    <p class="loader__text">正在建造群岛<span class="loader__dots"></span></p>
+  </div>
+
+  <!-- 整体滚动场景：背景层与岛屿栏一起平移 -->
+  <div class="scene" id="scene">
+    <!-- 两侧沙滩（贝壳 / 寄居蟹 / 沙粒） -->
+    <canvas id="beach" class="beach-layer"></canvas>
+
+    <!-- 海洋背景 -->
+    <div class="ocean" data-depth="0.02">
+      <div class="ocean__shine"></div>
+    </div>
+
+    <!-- 光点粒子 -->
+    <canvas id="particles" class="particles"></canvas>
+
+    <!-- 小鱼 -->
+    <canvas id="fish" class="fish-layer"></canvas>
+
+    <!-- 居中岛屿栏 -->
+    <main id="board" class="board">
+      <div class="islands" id="islands"></div>
+    </main>
+  </div>
+
+  <!-- 左上角个人资料卡（常驻视口，不随滚动） -->
+  <aside class="profile" id="profile">
+    <img class="profile__avatar" src="assets/avatar.png" alt="Relax" draggable="false" />
+    <h1 class="profile__name">Relax</h1>
+    <p class="profile__tagline">有趣的灵魂有多个维度</p>
+    <div class="profile__contacts">
+      <a class="profile__contact" href="https://wpa.qq.com/msgrd?v=3&uin=2495234235&site=qq&menu=yes" target="_blank" rel="noopener" aria-label="QQ 2495234235">
+        <span class="qq-ico" aria-hidden="true">🐧</span>2495234235
+      </a>
+    </div>
+  </aside>
+
+  <!-- 弹出卡片挂载点 -->
+  <div id="modal-root"></div>
+
+  <script src="js/islands.js"></script>
+  <script src="js/beach.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/fish.js"></script>
+  <script src="js/parallax.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
