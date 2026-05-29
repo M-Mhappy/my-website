@@ -119,6 +119,37 @@
   font-size: 15px;
 }
 
+/* 沉浸式模块（如音乐岛）：全幅内容，隐藏默认标题区 */
+.modal-card--immersive {
+  background: transparent;
+  box-shadow: 0 30px 70px rgba(10, 30, 45, 0.55);
+}
+
+.modal-card--immersive .modal-card__bar {
+  display: none;
+}
+
+.modal-card--immersive .modal-card__head {
+  display: none;
+}
+
+.modal-card--immersive .modal-card__body {
+  padding: 0;
+  overflow: hidden;
+}
+
+.modal-card--immersive .modal-card__content {
+  padding: 0;
+  min-height: 0;
+  height: 100%;
+  position: relative;
+}
+
+.modal-card--immersive .modal-card__close {
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.85);
+}
+
 @media (max-width: 760px) {
   .modal-card {
     width: 92vw;
