@@ -437,5 +437,20 @@ body {
 
 @media (max-width: 600px) {
   .island__label { font-size: 12px; padding: 5px 12px; }
-  .board { padding-top: 150px; }
+  .board { padding-top: 150px; padding-bottom: 80px; }
+  .profile__tagline { display: none; }
+  .profile__contact { font-size: 11px; padding: 4px 10px; }
+}
+
+@media (max-width: 480px) {
+  .board { padding-top: 130px; }
+  .island__label { font-size: 11px; padding: 4px 10px; max-width: 140px; }
+  .profile {
+    top: max(10px, env(safe-area-inset-top));
+    left: max(10px, env(safe-area-inset-left));
+    padding: 8px 12px 8px 8px;
+    gap: 10px;
+  }
+  .profile__avatar { width: 42px; height: 42px; }
+  .profile__name { font-size: 15px; }
 }

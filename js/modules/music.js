@@ -58,7 +58,8 @@ window.MusicModule = (function () {
   function buildCoverElements(container, covers) {
     const list = covers.length ? covers : [];
     if (!list.length) return;
-    const count = Math.min(Math.max(list.length, 5), 10);
+    const isMobile = window.matchMedia("(max-width: 760px)").matches;
+    const count = Math.min(Math.max(list.length, isMobile ? 4 : 5), isMobile ? 6 : 10);
     const picked = [];
     for (let i = 0; i < count; i++) {
       picked.push(list[i % list.length]);
@@ -222,7 +223,6 @@ window.MusicModule = (function () {
     };
 
     renderPlaylist(state.listEl, tracks, track.id);
-    state.hintEl.textContent = "";
 
     audio.pause();
     audio.src = encodeAssetPath(track.file);
@@ -253,12 +253,14 @@ window.MusicModule = (function () {
       try {
         await audio.play();
         setPlayIcon(true);
+        state.hintEl.textContent = "";
       } catch (_) {
         state.hintEl.textContent = "点击播放按钮开始播放";
         setPlayIcon(false);
       }
     } else {
       setPlayIcon(false);
+      state.hintEl.textContent = "点击播放按钮开始播放";
     }
     updateSeekUI();
   }
@@ -281,10 +283,10 @@ window.MusicModule = (function () {
     });
 
     state.root.querySelector('[data-action="prev"]').addEventListener("click", () => {
-      loadTrack(state.index - 1, true);
+      loadTrack(state.index - 1, false);
     });
     state.root.querySelector('[data-action="next"]').addEventListener("click", () => {
-      loadTrack(state.index + 1, true);
+      loadTrack(state.index + 1, false);
     });
 
     state.seek.addEventListener("input", () => {
@@ -325,7 +327,7 @@ window.MusicModule = (function () {
     });
 
     audio.addEventListener("ended", () => {
-      loadTrack(state.index + 1, true);
+      loadTrack(state.index + 1, false);
     });
 
     audio.addEventListener("loadedmetadata", updateSeekUI);
@@ -339,7 +341,7 @@ window.MusicModule = (function () {
     state.listEl.addEventListener("click", (e) => {
       const item = e.target.closest(".music-player__list-item");
       if (!item || item.dataset.index == null) return;
-      loadTrack(parseInt(item.dataset.index, 10), true);
+      loadTrack(parseInt(item.dataset.index, 10), false);
       state.listPanel.hidden = true;
     });
   }
@@ -382,7 +384,7 @@ window.MusicModule = (function () {
 
     bindEvents();
     renderPlaylist(state.listEl, playlist.tracks || [], null);
-    loadTrack(0, true);
+    loadTrack(0, false);
   }
 
   function unmount() {

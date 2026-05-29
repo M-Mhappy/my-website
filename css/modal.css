@@ -151,13 +151,32 @@
 }
 
 @media (max-width: 760px) {
-  .modal-card {
-    width: 92vw;
-    height: 90vh;
-    border-radius: 20px;
+  .modal-overlay {
+    padding: 0;
   }
+
+  .modal-card {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-width: none;
+    border-radius: 0;
+  }
+
   .modal-card__body {
     padding: 28px 24px 32px;
   }
+
+  .modal-card--immersive .modal-card__body {
+    padding: 0;
+  }
+
   .modal-card__title { font-size: 22px; }
+
+  .modal-card__close {
+    top: max(12px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
+    width: 44px;
+    height: 44px;
+  }
 }

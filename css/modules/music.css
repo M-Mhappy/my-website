@@ -341,7 +341,12 @@
 
 @media (max-width: 760px) {
   .music-scene {
-    border-radius: 20px;
+    border-radius: 0;
+  }
+
+  .music-cover {
+    width: calc(72px * var(--cover-scale, 1));
+    height: calc(72px * var(--cover-scale, 1));
   }
 
   .music-player {
@@ -350,17 +355,89 @@
     bottom: 0;
     transform: none;
     width: 100%;
-    border-radius: 20px 20px 0 0;
-    padding: 18px 16px 16px;
+    border-radius: 0;
+    padding: 14px 16px max(16px, env(safe-area-inset-bottom));
+  }
+
+  .music-player__now {
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .music-player__cover {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+  }
+
+  .music-player__title {
+    font-size: 17px;
+  }
+
+  .music-player__artist {
+    font-size: 12px;
+  }
+
+  .music-player__list-toggle {
+    width: 44px;
+    height: 44px;
   }
 
   .music-player__lyrics-wrap {
-    height: 96px;
+    height: 88px;
+    margin-bottom: 10px;
+  }
+
+  .music-player__lyric {
+    font-size: 14px;
+    line-height: 1.85;
+  }
+
+  .music-player__lyric.is-active {
+    font-size: 15px;
+  }
+
+  .music-player__controls {
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+
+  .music-player__btn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .music-player__btn--play {
+    width: 56px;
+    height: 56px;
+  }
+
+  .music-player__vol {
+    max-width: 100px;
+  }
+
+  .music-player__hint {
+    font-size: 11px;
   }
 
   .music-player__list-panel {
     width: 100%;
     border-left: none;
     border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .music-player__list-item {
+    padding: 14px 18px;
+  }
+}
+
+@media (max-width: 380px) {
+  .music-player__volume {
+    display: none;
+  }
+
+  .music-player__lyrics-wrap {
+    height: 72px;
   }
 }
