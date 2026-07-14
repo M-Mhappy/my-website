@@ -1,383 +1,337 @@
 :root {
-  /* 字体 */
-  --font-title: "ZCOOL KuaiLe", "Noto Sans SC", cursive;
-  --font-body: "Noto Sans SC", "PingFang SC", sans-serif;
-  /* 海洋（贴合素材的青蓝水色） */
-  --water-top: #6fc6dc;
-  --water-mid: #3fa3c4;
-  --deep-water: #2b86ac;
-
-  /* 文字 */
-  --ink: #3e3a39;
-  --ink-soft: #8c8984;
-  --paper: #fffdf7;
-
-  /* 沙滩留白 */
-  --sand: #e7d49a;
-
-  /* 布局设计稿：海洋 1160 + 两侧沙滩各 210（总宽 1580），窄屏等比缩小 */
-  --design-ocean: 1160px;
-  --design-sand: 210px;
-  --design-total: 1580;
-  /* 1160/1580 ≈ 73.418vw；勿写 100vw*1160px（单位相乘非法，会导致海洋宽度失效） */
-  --scene-w: min(var(--design-ocean), 73.418vw);
-
-  /* 岛屿 / 资料卡缩放（main.js 按海洋栏宽度覆盖） */
-  --layout-scale: 1;
-
-  /* 尺度 */
-  --label-blur: blur(14px);
+  --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --ink: #f4f1ea;
+  --ink-muted: rgba(244, 241, 234, 0.66);
+  --line: rgba(255, 255, 255, 0.16);
+  --panel: rgba(15, 16, 15, 0.34);
+  --paper: #f8f4ec;
+  --shadow: rgba(0, 0, 0, 0.34);
 }
 
-/* 页面底色：沙滩黄 + 细微沙粒质感（两侧留白可见） */
+html {
+  min-height: 100%;
+  background: #0e0f0e;
+}
+
 body {
-  position: relative;
-  background-color: var(--sand);
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E"),
-    radial-gradient(150% 120% at 50% -10%, #f1e3b4 0%, #e6cf90 55%, #dcc27e 100%);
-  background-size: 160px 160px, cover;
-  background-repeat: repeat, no-repeat;
-  background-attachment: fixed, fixed;
-  background-blend-mode: soft-light, normal;
+  min-height: 100%;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: #0e0f0e;
+  overflow-x: hidden;
 }
 
-/* ============ 整体滚动场景 ============ */
-.scene {
+.archive {
   position: relative;
-  width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
+  overflow: hidden;
+  background: #0e0f0e;
 }
 
-/* ============ 两侧沙滩装饰层（仅在留白区绘制） ============ */
-.beach-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* ============ 海洋背景 ============ */
-.ocean {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  /* 居中成一条海，两侧露出沙滩留白；用 left/width 居中以免与视差 transform 冲突 */
-  left: calc((100% - var(--scene-w)) / 2 - 4px);
-  width: calc(var(--scene-w) + 8px);
-  z-index: 0;
-  /* 竖向：顶部浅水海面 → 底部深水海床，配合滚动呈现下潜感 */
-  background:
-    linear-gradient(180deg,
-      var(--water-top) 0%,
-      var(--water-mid) 32%,
-      var(--deep-water) 72%,
-      #1f6f93 100%);
-  box-shadow: 0 0 60px rgba(15, 55, 75, 0.28);
-  will-change: transform;
-}
-
-/* 波光：缓慢平移的柔和高光带 */
-.ocean__shine {
-  position: absolute;
+.archive::after {
+  content: "";
+  position: fixed;
   inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  border: 1px solid var(--line);
   background:
-    repeating-linear-gradient(
-      115deg,
-      rgba(255, 255, 255, 0) 0px,
-      rgba(255, 255, 255, 0) 60px,
-      rgba(255, 255, 255, 0.05) 80px,
-      rgba(255, 255, 255, 0) 120px
-    );
-  background-size: 240px 240px;
-  animation: shine-drift 22s linear infinite;
-  opacity: 0.7;
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px) 0 0 / 20% 100%,
+    linear-gradient(180deg, transparent 0 30%, rgba(255, 255, 255, 0.08) 30% calc(30% + 1px), transparent calc(30% + 1px));
+  opacity: 0.36;
 }
 
-@keyframes shine-drift {
-  from { background-position: 0 0; }
-  to   { background-position: 480px 240px; }
-}
-
-/* ============ 光点粒子（限定在海洋栏内） ============ */
-.particles {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: var(--scene-w);
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* ============ 小鱼（限定在海洋栏内） ============ */
-.fish-layer {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: var(--scene-w);
-  z-index: 2;
-  pointer-events: none;
-}
-
-/* ============ 居中滚动栏 ============ */
-.board {
-  position: relative;
-  z-index: 3;
-  width: var(--scene-w);
-  margin: 0 auto;
-  padding:
-    calc(210px * var(--layout-scale) + env(safe-area-inset-top, 0px))
-    0
-    calc(120px * var(--layout-scale) + env(safe-area-inset-bottom, 0px));
-}
-
-/* ============ 岛屿层 ============ */
-.islands {
-  position: relative;
-  width: 100%;
-}
-
-/* 多层嵌套：每层只负责一种 transform，避免互相覆盖
-   .island       居中定位 + 入场淡入
-   .island__rise 入场上浮
-   .island__floater 常驻浮动
-   .island__inner   悬停放大 */
-.island {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  opacity: 0;
-  transition: opacity 0.7s ease;
-  transition-delay: var(--d, 0s);
-}
-
-.island.is-in {
-  opacity: 1;
-}
-
-.island__rise {
-  width: 100%;
-  transform: translateY(60px);
-  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-  transition-delay: var(--d, 0s);
-}
-
-.island.is-in .island__rise {
-  transform: translateY(0);
-}
-
-.island__floater {
-  width: 100%;
-  animation: island-float ease-in-out infinite;
-}
-
-.island__inner {
-  width: 100%;
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .island:hover .island__inner,
-  .island:focus-visible .island__inner {
-    transform: translateY(-6px) scale(1.06);
-  }
-
-  .island:hover .island__label {
-    transform: translate(-50%, -108%);
-    box-shadow: 0 8px 20px rgba(15, 60, 80, 0.26);
-  }
-}
-
-/* 触屏：点击时短暂高亮，避免 hover 粘滞 */
-@media (hover: none) {
-  .island:active .island__inner {
-    transform: translateY(-4px) scale(1.04);
-    transition-duration: 0.15s;
-  }
-}
-
-@keyframes island-float {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-10px); }
-}
-
-/* 岛屿图片：椭圆长羽化遮罩，让横向插画自带的天空背景四边柔和溶进海水 */
-.island__img {
-  width: 100%;
-  height: auto;
-  -webkit-mask-image: radial-gradient(ellipse 58% 56% at 50% 46%, #000 34%, rgba(0, 0, 0, 0.5) 74%, transparent 100%);
-  mask-image: radial-gradient(ellipse 58% 56% at 50% 46%, #000 34%, rgba(0, 0, 0, 0.5) 74%, transparent 100%);
-  filter: drop-shadow(0 14px 18px rgba(15, 60, 80, 0.32));
-}
-
-/* 占位岛屿（尚未提供素材） */
-.island__placeholder {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background:
-    radial-gradient(circle at 50% 35%, #f5e6ca 0%, #ead7b0 38%, transparent 39%),
-    radial-gradient(circle at 50% 60%, var(--island-color, #8bc34a) 0%, color-mix(in srgb, var(--island-color, #8bc34a) 70%, #2f6b1f) 70%, transparent 72%);
-  box-shadow: 0 18px 24px rgba(15, 60, 80, 0.32);
-}
-
-.island__placeholder::before {
-  content: attr(data-emoji);
-  font-size: clamp(28px, 22%, 56px);
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.15));
-}
-
-.island__placeholder::after {
-  content: "";
-  position: absolute;
-  bottom: 8%;
-  width: 78%;
-  height: 14%;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
-  filter: blur(4px);
-}
-
-/* ============ 岛屿名称标签 ============ */
-.island__label {
-  position: absolute;
-  left: 50%;
-  top: calc(-14px * var(--layout-scale, 1));
-  transform: translate(-50%, -100%);
-  display: inline-flex;
-  align-items: center;
-  gap: calc(6px * var(--layout-scale, 1));
-  padding: calc(6px * var(--layout-scale, 1)) calc(16px * var(--layout-scale, 1));
-  border-radius: calc(20px * var(--layout-scale, 1));
-  white-space: nowrap;
-  font-size: calc(14px * var(--layout-scale, 1));
-  font-weight: 500;
-  color: var(--ink);
-  background: rgba(255, 253, 247, 0.7);
-  backdrop-filter: var(--label-blur);
-  -webkit-backdrop-filter: var(--label-blur);
-  box-shadow: 0 4px 14px rgba(15, 60, 80, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  pointer-events: none;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.island__label::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -5px;
-  width: 10px;
-  height: 10px;
-  background: inherit;
-  border-right: 1px solid rgba(255, 255, 255, 0.6);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-  transform: translateX(-50%) rotate(45deg);
-}
-
-.island__label .dot {
-  width: calc(8px * var(--layout-scale, 1));
-  height: calc(8px * var(--layout-scale, 1));
-  border-radius: 50%;
-  background: var(--island-color, #26a69a);
-}
-
-/* ============ 左上角资料卡（竖排，随 --layout-scale 等比缩小） ============ */
 .profile {
-  position: absolute;
-  top: calc(18px * var(--layout-scale, 1) + env(safe-area-inset-top, 0px));
-  left: calc(16px * var(--layout-scale, 1) + env(safe-area-inset-left, 0px));
-  z-index: 50;
+  position: fixed;
+  top: max(28px, env(safe-area-inset-top));
+  left: max(32px, env(safe-area-inset-left));
+  z-index: 30;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: calc(6px * var(--layout-scale, 1));
-  width: calc(200px * var(--layout-scale, 1));
-  max-width: calc((100vw - var(--scene-w)) / 2 - 8px);
-  padding:
-    calc(22px * var(--layout-scale, 1))
-    calc(16px * var(--layout-scale, 1))
-    calc(18px * var(--layout-scale, 1));
-  box-sizing: border-box;
-  border-radius: calc(22px * var(--layout-scale, 1));
-  text-align: center;
-  background: rgba(255, 253, 247, 0.74);
-  backdrop-filter: blur(16px) saturate(1.1);
-  -webkit-backdrop-filter: blur(16px) saturate(1.1);
-  box-shadow: 0 12px 30px rgba(120, 95, 40, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  gap: 14px;
+  width: min(320px, calc(100vw - 64px));
+  padding: 14px 16px;
+  color: #fff;
+  background: rgba(8, 10, 10, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
   opacity: 0;
-  transition: opacity 0.7s ease;
+  transform: translateY(-10px);
+  transition: opacity 520ms ease, transform 520ms ease;
 }
 
 .profile.is-in {
   opacity: 1;
+  transform: translateY(0);
 }
 
 .profile__avatar {
   flex: none;
-  width: calc(76px * var(--layout-scale, 1));
-  height: calc(76px * var(--layout-scale, 1));
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   object-fit: cover;
-  border: calc(3px * var(--layout-scale, 1)) solid #fff;
-  box-shadow: 0 calc(4px * var(--layout-scale, 1)) calc(12px * var(--layout-scale, 1)) rgba(0, 0, 0, 0.15);
-  margin-bottom: calc(4px * var(--layout-scale, 1));
+  border: 2px solid rgba(255, 255, 255, 0.76);
+}
+
+.profile__copy {
+  min-width: 0;
 }
 
 .profile__name {
-  font-family: var(--font-title);
-  font-size: calc(20px * var(--layout-scale, 1));
-  line-height: 1.2;
-  color: var(--ink);
+  margin: 0;
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 0.08em;
 }
 
 .profile__tagline {
-  font-size: calc(12px * var(--layout-scale, 1));
-  color: var(--ink-soft);
-  margin: calc(2px * var(--layout-scale, 1)) 0 calc(10px * var(--layout-scale, 1));
-}
-
-.profile__contacts {
-  display: flex;
-  justify-content: center;
-  width: 100%;
+  margin: 7px 0 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ink-muted);
 }
 
 .profile__contact {
   display: inline-flex;
   align-items: center;
-  gap: calc(6px * var(--layout-scale, 1));
   max-width: 100%;
-  padding: calc(6px * var(--layout-scale, 1)) calc(12px * var(--layout-scale, 1));
-  border-radius: 999px;
-  font-size: calc(13px * var(--layout-scale, 1));
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.62);
-  transition: transform 0.2s ease, background 0.2s ease;
-  word-break: keep-all;
-}
-
-.profile__contact .qq-ico {
-  font-size: calc(15px * var(--layout-scale, 1));
-  line-height: 1;
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+  color: #151515;
+  background: rgba(255, 255, 255, 0.88);
+  transition: background 180ms ease, transform 180ms ease;
 }
 
 .profile__contact:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   background: #fff;
 }
 
-/* ============ 加载页 ============ */
+.archive-nav {
+  position: fixed;
+  top: max(38px, env(safe-area-inset-top));
+  right: max(28px, env(safe-area-inset-right));
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 2.2vw, 42px);
+}
+
+.archive-nav a {
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  transition: color 180ms ease;
+}
+
+.archive-nav a:hover {
+  color: #fff;
+}
+
+.archive-nav__menu {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.archive-nav__menu span {
+  display: block;
+  width: 23px;
+  height: 2px;
+  background: #fff;
+}
+
+.archive-nav__menu:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.archive-grid {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 680px;
+}
+
+.archive-tile {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  cursor: pointer;
+  isolation: isolate;
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    flex 640ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 540ms ease var(--delay),
+    transform 540ms ease var(--delay),
+    filter 320ms ease;
+}
+
+.archive-tile--lead {
+  flex-grow: 1.22;
+}
+
+.archive-tile.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.archive-grid:hover .archive-tile {
+  flex-grow: 0.82;
+}
+
+.archive-grid:hover .archive-tile:hover,
+.archive-grid:hover .archive-tile:focus-visible {
+  flex-grow: 1.82;
+}
+
+.archive-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.62) 66%, rgba(0, 0, 0, 0.78));
+  transition: opacity 360ms ease;
+}
+
+.archive-tile:hover::before,
+.archive-tile:focus-visible::before {
+  opacity: 0.78;
+}
+
+.archive-tile__image {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.82) brightness(0.78);
+  transform: scale(1.02);
+  transition: transform 720ms cubic-bezier(0.22, 1, 0.36, 1), filter 420ms ease;
+}
+
+.archive-tile:hover .archive-tile__image,
+.archive-tile:focus-visible .archive-tile__image {
+  filter: saturate(1.04) brightness(0.88);
+  transform: scale(1.1);
+}
+
+.archive-tile__shade {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.22), transparent 18%, rgba(0, 0, 0, 0.18));
+  mix-blend-mode: multiply;
+}
+
+.archive-tile__content {
+  position: absolute;
+  left: clamp(24px, 3vw, 42px);
+  right: clamp(20px, 2.4vw, 36px);
+  bottom: clamp(38px, 7vh, 88px);
+  z-index: 4;
+  display: grid;
+  align-content: end;
+  min-height: 250px;
+}
+
+.archive-tile--lead .archive-tile__content {
+  min-height: 390px;
+}
+
+.archive-tile__eyebrow {
+  margin: 0 0 18px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: clamp(12px, 0.9vw, 14px);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.archive-tile__title {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(38px, 4.6vw, 86px);
+  line-height: 0.95;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.archive-tile--lead .archive-tile__title {
+  font-size: clamp(56px, 6.2vw, 118px);
+}
+
+.archive-tile__summary {
+  max-width: 13em;
+  margin: 14px 0 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: clamp(15px, 1.25vw, 21px);
+  line-height: 1.55;
+  font-style: italic;
+  text-shadow: 0 1px 20px rgba(0, 0, 0, 0.34);
+}
+
+.archive-tile__action {
+  width: max-content;
+  max-width: 100%;
+  min-height: 52px;
+  margin-top: 26px;
+  padding: 0 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #101111;
+  background: rgba(255, 255, 255, 0.92);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: translateY(12px);
+  opacity: 0;
+  transition: opacity 240ms ease, transform 240ms ease, background 180ms ease;
+}
+
+.archive-tile:hover .archive-tile__action,
+.archive-tile:focus-visible .archive-tile__action,
+.archive-tile--lead .archive-tile__action {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.archive-tile__action:hover {
+  background: #fff;
+}
+
+.archive-tile:focus-visible,
+.archive-nav__menu:focus-visible,
+.profile__contact:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.92);
+  outline-offset: -4px;
+}
+
 .loader {
   position: fixed;
   inset: 0;
@@ -385,9 +339,10 @@ body {
   display: grid;
   place-content: center;
   justify-items: center;
-  gap: 18px;
-  background: linear-gradient(160deg, var(--water-top), var(--deep-water));
-  transition: opacity 0.6s ease, visibility 0.6s ease;
+  gap: 16px;
+  background: #101111;
+  color: #fff;
+  transition: opacity 520ms ease, visibility 520ms ease;
 }
 
 .loader.is-hidden {
@@ -395,128 +350,139 @@ body {
   visibility: hidden;
 }
 
-.loader__spinner {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  border: 4px solid rgba(255, 255, 255, 0.4);
+.loader__mark {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.36);
   border-top-color: #fff;
-  animation: spin 0.9s linear infinite;
+  animation: spin 900ms linear infinite;
+}
+
+.loader__text {
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.74);
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-.loader__text {
-  font-family: var(--font-title);
-  color: #fff;
-  font-size: 18px;
-  letter-spacing: 1px;
+@media (max-width: 1120px) {
+  .archive-nav a {
+    display: none;
+  }
+
+  .archive-grid {
+    min-height: 760px;
+  }
+
+  .archive-tile__title,
+  .archive-tile--lead .archive-tile__title {
+    font-size: clamp(36px, 5.3vw, 64px);
+  }
 }
 
-.loader__dots {
-  display: inline-block;
-  min-width: 1em;
-  text-align: left;
-}
-
-/* ============ 响应式 ============ */
-
-/* iOS：fixed 背景易错位 */
-@media (max-width: 1023px) {
+@media (max-width: 760px) {
   body {
-    background-attachment: scroll, scroll;
-  }
-}
-
-/* 极窄屏：标签略减模糊半径以保性能 */
-@media (max-width: 480px) {
-  :root {
-    --label-blur: blur(8px);
-  }
-}
-
-/* ============ 手机端（≤640px）自适应布局 ============ */
-@media (max-width: 640px) {
-  /* 海洋占满几乎整个宽度，仅留细窄沙滩边 */
-  :root {
-    --scene-w: 94vw;
+    background: #101111;
   }
 
-  /* 海洋微调：窄屏下减少两侧投影扩散，避免溢出 */
-  .ocean {
-    box-shadow: 0 0 30px rgba(15, 55, 75, 0.2);
+  .archive {
+    overflow: visible;
   }
 
-  /* board 顶部留出资料卡的空间 */
-  .board {
-    padding-top: 72px;
+  .archive::after {
+    display: none;
   }
 
-  /* ===== 资料卡：改为顶部固定横向紧凑卡片 ===== */
   .profile {
-    position: fixed;
-    top: max(6px, env(safe-area-inset-top));
-    left: 50%;
-    transform: translateX(-50%);
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 8px;
+    top: max(14px, env(safe-area-inset-top));
+    left: 14px;
+    right: 82px;
     width: auto;
-    max-width: calc(94vw - 12px);
-    margin: 0;
-    padding: 6px 12px;
-    border-radius: 14px;
-    text-align: left;
-    z-index: 100;
+    padding: 10px 12px;
   }
 
   .profile__avatar {
-    width: 36px;
-    height: 36px;
-    border-width: 2px;
-    margin-bottom: 0;
-    flex: none;
-  }
-
-  .profile__name {
-    font-size: 15px;
-    white-space: nowrap;
+    width: 44px;
+    height: 44px;
   }
 
   .profile__tagline {
     display: none;
   }
 
-  .profile__contacts {
-    margin-left: auto;
-    width: auto;
+  .profile__contact {
+    min-height: 24px;
+    font-size: 11px;
+  }
+
+  .archive-nav {
+    top: max(14px, env(safe-area-inset-top));
+    right: 14px;
+  }
+
+  .archive-nav__menu {
+    width: 52px;
+    height: 52px;
+  }
+
+  .archive-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: 0;
+    padding-top: 86px;
+  }
+
+  .archive-grid:hover .archive-tile,
+  .archive-grid:hover .archive-tile:hover,
+  .archive-grid:hover .archive-tile:focus-visible,
+  .archive-tile,
+  .archive-tile--lead {
     flex: none;
   }
 
-  .profile__contact {
-    font-size: 11px;
-    padding: 3px 8px;
-    gap: 4px;
+  .archive-tile {
+    min-height: 62vh;
+    border-top: 1px solid var(--line);
   }
 
-  .profile__contact .qq-ico {
-    font-size: 12px;
+  .archive-tile__content,
+  .archive-tile--lead .archive-tile__content {
+    min-height: 0;
+    left: 24px;
+    right: 24px;
+    bottom: 34px;
   }
 
-  /* 岛屿标签：确保在较小尺寸下仍可读 */
-  .island__label {
-    font-size: max(11px, calc(14px * var(--layout-scale, 1)));
-    padding: max(4px, calc(6px * var(--layout-scale, 1)))
-             max(10px, calc(16px * var(--layout-scale, 1)));
-    gap: max(3px, calc(6px * var(--layout-scale, 1)));
-    border-radius: max(12px, calc(20px * var(--layout-scale, 1)));
+  .archive-tile__title,
+  .archive-tile--lead .archive-tile__title {
+    font-size: clamp(44px, 15vw, 74px);
   }
 
-  .island__label .dot {
-    width: max(5px, calc(8px * var(--layout-scale, 1)));
-    height: max(5px, calc(8px * var(--layout-scale, 1)));
+  .archive-tile__summary {
+    max-width: 18em;
+    font-size: 16px;
+  }
+
+  .archive-tile__action {
+    min-height: 46px;
+    padding: 0 22px;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }

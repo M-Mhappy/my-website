@@ -87,7 +87,7 @@ window.MusicModule = (function () {
   }
 
   function createDom(island) {
-    const bg = island.sprite || "assets/islands/music.png";
+    const bg = island.sprite || "assets/archive/music.jpg";
     const bgUrl = encodeAssetPath(bg.startsWith("/") ? bg.slice(1) : bg);
     const wrap = document.createElement("div");
     wrap.className = "music-scene";
