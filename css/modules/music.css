@@ -22,6 +22,30 @@
   overflow: hidden;
 }
 
+/* 左下角循环视频：默认 80% 透明度，悬停变清晰并微微放大 */
+.music-scene__video {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  width: 220px;
+  height: auto;
+  max-width: 34vw;
+  border-radius: 12px;
+  object-fit: cover;
+  z-index: 4;
+  opacity: 0.8;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.38);
+  outline: 1px solid rgba(255, 255, 255, 0.14);
+  transform: scale(1);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
+}
+
+.music-scene__video:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
 .music-cover {
   position: absolute;
   width: calc(110px * var(--cover-scale, 1));
@@ -342,6 +366,11 @@
 @media (max-width: 760px) {
   .music-scene {
     border-radius: 0;
+  }
+
+  /* 小屏播放器占满底部，隐藏左下角视频避免遮挡 */
+  .music-scene__video {
+    display: none;
   }
 
   .music-cover {

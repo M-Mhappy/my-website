@@ -55,6 +55,20 @@ window.MusicModule = (function () {
     return idx;
   }
 
+  // 左下角视频保留区（百分比）：封面禁止飘入该区域
+  const VIDEO_ZONE = { leftMax: 34, topMin: 48 };
+
+  function pickCoverPosition() {
+    for (let i = 0; i < 12; i++) {
+      const left = 5 + Math.random() * 85;
+      const top = 5 + Math.random() * 75;
+      const inVideoZone = left < VIDEO_ZONE.leftMax && top > VIDEO_ZONE.topMin;
+      if (!inVideoZone) return { left, top };
+    }
+    // 兜底：放到右上安全区
+    return { left: 62 + Math.random() * 28, top: 5 + Math.random() * 38 };
+  }
+
   function buildCoverElements(container, covers) {
     const list = covers.length ? covers : [];
     if (!list.length) return;
@@ -69,14 +83,15 @@ window.MusicModule = (function () {
       const depthIdx = Math.floor(Math.random() * DEPTH.length);
       const d = DEPTH[depthIdx];
       const el = document.createElement("img");
+      const pos = pickCoverPosition();
       el.className = "music-cover";
       el.src = encodeAssetPath(src);
       el.alt = "";
       el.draggable = false;
       el.style.setProperty("--cover-scale", d.scale);
       el.style.setProperty("--cover-z", d.z);
-      el.style.left = 5 + Math.random() * 85 + "%";
-      el.style.top = 5 + Math.random() * 75 + "%";
+      el.style.left = pos.left + "%";
+      el.style.top = pos.top + "%";
       el.style.animationDelay = -(Math.random() * d.duration) + "s";
       el.style.animationDuration = d.duration + "s";
       el.addEventListener("error", () => {
@@ -94,6 +109,7 @@ window.MusicModule = (function () {
     wrap.innerHTML = `
       <div class="music-scene__bg"></div>
       <div class="music-scene__covers"></div>
+      <video class="music-scene__video" src="assets/videos/music-video.mp4" autoplay loop muted playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
       <div class="music-player">
         <div class="music-player__now">
           <img class="music-player__cover" src="" alt="" draggable="false" />
@@ -138,6 +154,10 @@ window.MusicModule = (function () {
     bgEl.style.backgroundPosition = "center";
     bgEl.style.backgroundSize = "cover";
     bgEl.style.backgroundRepeat = "no-repeat";
+
+    const videoEl = wrap.querySelector(".music-scene__video");
+    videoEl.play().catch(() => { /* 静音视频自动播放失败时忽略 */ });
+
     return wrap;
   }
 
@@ -387,6 +407,14 @@ window.MusicModule = (function () {
   }
 
   function unmount() {
+    if (root) {
+      const videoEl = root.querySelector(".music-scene__video");
+      if (videoEl) {
+        videoEl.pause();
+        videoEl.removeAttribute("src");
+        videoEl.load();
+      }
+    }
     if (audio) {
       audio.pause();
       audio.src = "";
