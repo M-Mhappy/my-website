@@ -15,3 +15,7 @@ __music_test.html
 !.dev.vars.example
 .env*
 !.env.example
+
+# CI/CD deploy artifacts
+site-deploy.tar.gz
+.deploy/

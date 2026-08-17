@@ -12,8 +12,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Package site with tar
-        # 输出写到 /tmp，避免 tar 在打包目录内写入导致 "file changed as we read it"（exit 1）
-        run: tar czf /tmp/site-deploy.tar.gz --exclude='.git' --exclude='.github' -C "$GITHUB_WORKSPACE" .
+        # 两个坑都要避开：
+        # 1. 归档必须写在 Runner 的 $GITHUB_WORKSPACE 里（scp-action 运行在独立容器，
+        #    只挂载 /github/workspace；容器内 /tmp 与 Runner 的 /tmp 隔离 → 读不到 → "tar: empty archive"）
+        # 2. 归档不能直接写在被扫描的目录里（tar 会把输出文件也读进去 → "file changed as we read it"，
+        #    exit 1）。即使 --exclude 排除了自身，创建文件导致目录 mtime 变化仍会触发该错误退出码 1。
+        #    正确做法：归档写到被 --exclude 排除的子目录 .deploy/ 里，tar 不会扫描它，退出码 0。
+        run: |
+          mkdir -p .deploy
+          tar czf .deploy/site-deploy.tar.gz --exclude='.git' --exclude='.github' --exclude='.deploy' -C "$GITHUB_WORKSPACE" .
 
       - name: Copy tarball to server
         uses: appleboy/scp-action@v0.1.7
@@ -21,7 +28,7 @@ jobs:
           host: 47.103.197.64
           username: admin
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "/tmp/site-deploy.tar.gz"
+          source: ".deploy/site-deploy.tar.gz"
           target: "/tmp/"
           strip_components: 0
           overwrite: true
@@ -33,9 +40,15 @@ jobs:
           username: admin
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
+            set -e
             cd /var/www/my-website
             find . -maxdepth 1 ! -name '.' ! -name 'my-website-deploy.zip' -exec rm -rf {} +
             tar xzf /tmp/site-deploy.tar.gz -C /var/www/my-website/
             rm -f /tmp/site-deploy.tar.gz
+            # 验证音乐文件是否就位（MP3 无法播放的常见原因就是服务器上没有音频文件）
+            echo "--- assets/music ---"
+            ls -la assets/music/ 2>/dev/null || echo "❌ assets/music 目录不存在"
+            echo "--- 本地 HTTP 检查 MP3 ---"
+            curl -s -o /dev/null -w "mp3 HTTP %{http_code} | %{content_type} | %{size_download} bytes\n" "http://localhost/assets/music/%E5%91%A8%E6%9D%B0%E5%80%AB%20-%20%E6%99%B4%E5%A4%A9.mp3" || true
             echo "✅ Deployed at $(date)"
             curl -sf http://localhost/ > /dev/null && echo "✅ Site accessible" || echo "❌ Site check failed"
