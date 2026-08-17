@@ -29,9 +29,13 @@ jobs:
           host: 47.103.197.64
           username: admin
           key: ${{ secrets.DEPLOY_SSH_KEY }}
+          # scp-action 是"归档→传输→在 target 下解压"，且保留 source 的相对路径。
+          # source ".deploy/site-deploy.tar.gz" 若不剥前缀，会落到 /tmp/.deploy/ 下，
+          # 与 ssh 解压步骤找的 /tmp/site-deploy.tar.gz 对不上 → "Cannot open"。
+          # strip_components: 1 去掉 .deploy/ 这一层，文件精确落在 /tmp/site-deploy.tar.gz。
           source: ".deploy/site-deploy.tar.gz"
           target: "/tmp/"
-          strip_components: 0
+          strip_components: 1
           overwrite: true
 
       - name: Extract on server
