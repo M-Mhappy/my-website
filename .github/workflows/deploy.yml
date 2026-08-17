@@ -18,9 +18,10 @@ jobs:
         # 2. 归档不能直接写在被扫描的目录里（tar 会把输出文件也读进去 → "file changed as we read it"，
         #    exit 1）。即使 --exclude 排除了自身，创建文件导致目录 mtime 变化仍会触发该错误退出码 1。
         #    正确做法：归档写到被 --exclude 排除的子目录 .deploy/ 里，tar 不会扫描它，退出码 0。
+        # 3. deploy/ 是仓库内参考文档（nginx-site.conf、fix-server.sh 等），不进线上站点，一并排除。
         run: |
           mkdir -p .deploy
-          tar czf .deploy/site-deploy.tar.gz --exclude='.git' --exclude='.github' --exclude='.deploy' -C "$GITHUB_WORKSPACE" .
+          tar czf .deploy/site-deploy.tar.gz --exclude='.git' --exclude='.github' --exclude='.deploy' --exclude='deploy' -C "$GITHUB_WORKSPACE" .
 
       - name: Copy tarball to server
         uses: appleboy/scp-action@v0.1.7
