@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Package site with tar
-        run: tar czf /tmp/site-deploy.tar.gz --exclude='.git' --exclude='.github' .
+        run: tar czf site-deploy.tar.gz --exclude='.git' --exclude='.github' .
 
       - name: Copy tarball to server
         uses: appleboy/scp-action@v0.1.7
@@ -20,7 +20,7 @@ jobs:
           host: 47.103.197.64
           username: admin
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "/tmp/site-deploy.tar.gz"
+          source: "site-deploy.tar.gz"
           target: "/tmp/"
           strip_components: 0
           overwrite: true
@@ -33,9 +33,6 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd /var/www/my-website
-            # 备份旧文件（可选）
-            # tar czf /tmp/backup-$(date +%s).tar.gz .
-            # 清理并解压新文件
             find . -maxdepth 1 ! -name '.' ! -name 'my-website-deploy.zip' -exec rm -rf {} +
             tar xzf /tmp/site-deploy.tar.gz -C /var/www/my-website/
             rm -f /tmp/site-deploy.tar.gz
